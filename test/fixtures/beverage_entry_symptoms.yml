@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  beverage_entry: one
+  symptom: one
+  severity: MyString
+  timing: MyString
+  notes: MyText
+
+two:
+  beverage_entry: two
+  symptom: two
+  severity: MyString
+  timing: MyString
+  notes: MyText

@@ -1,0 +1,16 @@
+/*
+ *= require tailwind
+ */
+
+ /* app/assets/stylesheets/application.css */
+.swal2-popup {
+  font-family: 'Inter', sans-serif;
+}
+
+.swal2-title {
+  @apply text-lg font-bold text-gray-900;
+}
+
+.swal2-html-container {
+  @apply text-sm text-gray-600;
+}

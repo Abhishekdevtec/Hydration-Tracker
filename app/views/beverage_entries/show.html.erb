@@ -1,0 +1,210 @@
+<div class="bg-white shadow rounded-lg p-6">
+  <div class="flex justify-between items-start">
+    <div>
+      <h2 class="text-xl font-bold text-gray-800">
+        <%= @beverage_entry.custom_type.presence || @beverage_entry.beverage_subtype&.name || @beverage_entry.beverage_type.name %>
+      </h2>
+      <p class="text-gray-600">
+        <%= @beverage_entry.consumed_at.strftime("%B %d, %Y at %I:%M %p") %>
+      </p>
+    </div>
+    <div class="text-sm text-gray-500">
+      <%= @beverage_entry.quantity %> <%= @beverage_entry.unit %>
+    </div>
+  </div>
+  <% if @calorie_estimate %>
+  <div class="mt-4 p-3 bg-green-50 rounded-lg">
+    <p class="text-sm text-green-800">
+      <strong>Calorie Estimate:</strong> <%= @calorie_estimate %>
+    </p>
+  </div>
+  <% end %>
+
+  <!-- Temperature Display -->
+  <% if @beverage_entry.temperature.present? %>
+  <div class="mt-2 mb-3">
+    <span class="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 space-x-2">
+      <span><%= temperature_emoji(@beverage_entry.temperature) %></span>
+      <span><%= temperature_label(@beverage_entry.temperature) %></span>
+      <span class="font-semibold">(<%= @beverage_entry.temperature %>°C/<%= celsius_to_fahrenheit(@beverage_entry.temperature) %>°F)</span>
+    </span>
+  </div>
+  <% end %>
+
+  <!-- Photo display -->
+  <% if @beverage_entry.photo.attached? %>
+  <div class="mt-4">
+    <%= image_tag @beverage_entry.photo.variant(resize_to_limit: [300, 300]), class: "max-w-full h-auto rounded-lg" %>
+  </div>
+  <% end %>
+
+  <!-- Additions -->
+  <% if @beverage_entry.beverage_entry_additions.any? %>
+  <div class="mt-4">
+    <h3 class="text-sm font-medium text-gray-700">Additions</h3>
+    <div class="mt-1 flex flex-wrap gap-1">
+      <% @beverage_entry.beverage_additions.each do |addition| %>
+      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+        <%= addition.name %>
+      </span>
+      <% end %>
+    </div>
+  </div>
+  <% end %>
+
+  <!-- Notes -->
+  <% if @beverage_entry.notes.present? %>
+  <div class="mt-4">
+    <h3 class="text-sm font-medium text-gray-700">Notes</h3>
+    <p class="mt-1 text-sm text-gray-600 whitespace-pre-wrap"><%= @beverage_entry.notes %></p>
+  </div>
+  <% end %>
+
+  <% if @beverage_entry.beverage_entry_symptoms.any? %>
+  <div class="mt-6 border-t border-gray-200 pt-4">
+    <h3 class="text-lg font-medium text-gray-900">Symptoms</h3>
+
+    <!-- Symptoms Listed Separately -->
+    <div class="mt-3 flex flex-wrap gap-2">
+      <% @beverage_entry.beverage_entry_symptoms.each do |symptom| %>
+      <span class="px-3 py-1 bg-red-200 text-red-800 rounded-full text-sm font-medium">
+        <%= symptom.symptom.name %>
+      </span>
+      <% end %>
+    </div>
+
+    <!-- Severity, Timing & Notes in a Separate Box -->
+    <% first_symptom = @beverage_entry.beverage_entry_symptoms.first %>
+    <% if first_symptom && (first_symptom.severity.present? || first_symptom.timing.present? || first_symptom.notes.present?) %>
+    <div class="mt-3 p-3 bg-red-50 rounded-lg">
+      <div class="text-sm text-red-700">
+        <% if first_symptom.severity.present? %>
+        <p><strong>Severity:</strong> <%= first_symptom.severity %></p>
+        <% end %>
+        <% if first_symptom.timing.present? %>
+        <p><strong>Appeared:</strong> <%= first_symptom.timing %></p>
+        <% end %>
+        <% if first_symptom.notes.present? %>
+        <p><strong>Notes:</strong> <%= first_symptom.notes %></p>
+        <% end %>
+      </div>
+    </div>
+    <% end %>
+  </div>
+  <% end %>
+
+  <% recommendations = [] %>
+  <% if @beverage_entry.symptoms.any? %>
+  <!-- Temperature Related Recommendations -->
+  <% if @beverage_entry.temperature.present? %>
+  <% if @beverage_entry.symptoms.any? { |s| ["Acid Reflux / Heartburn"].include?(s.name) } && @beverage_entry.temperature.to_i > 70 %>
+  <% recommendations << "Temperature Tip: The hot temperature (#{@beverage_entry.temperature}°C) may aggravate acid reflux. Try letting it cool to 50-60°C before drinking." %>
+  <% end %>
+
+  <% if @beverage_entry.symptoms.any? { |s| ["Headache", "Dizziness / Lightheadedness"].include?(s.name) } && @beverage_entry.temperature.to_i < 10 %>
+  <% recommendations << "Cold Drink Tip: Very cold drinks can trigger headaches in some people. Try drinking at a slightly cooler than room temperature." %>
+  <% end %>
+  <% end %>
+
+  <!-- Category-Specific Recommendations -->
+  <% case @beverage_entry.beverage_type.category %>
+  <% when "carbonated" %>
+  <% if @beverage_entry.symptoms.any? { |s| ["Bloating", "Burping / Excess Gas"].include?(s.name) } %>
+  <% recommendations << "Carbonation Tip: The carbonation in #{@beverage_entry.beverage_type.name.downcase} can cause bloating. Try still alternatives like infused water." %>
+  <% end %>
+
+  <% if @beverage_entry.symptoms.any? { |s| ["Diarrhea / Loose Stools"].include?(s.name) } && @beverage_entry.beverage_additions.any? { |a| ["Artificial Sweeteners"].include?(a.name) } %>
+  <% recommendations << "Sweetener Alert: Artificial sweeteners in carbonated drinks may cause digestive issues. Consider drinks with natural sweeteners." %>
+  <% end %>
+
+  <% when "coffee" %>
+  <% if @beverage_entry.symptoms.any? { |s| ["Anxiety", "Rapid Heartbeat"].include?(s.name) } %>
+  <% recommendations << "Caffeine Tip: The caffeine in #{@beverage_entry.beverage_type.name.downcase} may be causing these symptoms. Try switching to decaf or reducing your intake." %>
+  <% end %>
+
+  <% if @beverage_entry.symptoms.any? { |s| ["Acid Reflux / Heartburn"].include?(s.name) } %>
+  <% recommendations << "Acidity Tip: Coffee can increase stomach acidity. Try cold brew which is typically less acidic, or add a splash of milk." %>
+  <% end %>
+
+  <% when "tea" %>
+  <% if @beverage_entry.symptoms.any? { |s| ["Nausea"].include?(s.name) } && @beverage_entry.beverage_subtype&.name&.include?("Ginger") %>
+  <% recommendations << "Herbal Reminder: Ginger tea can help with nausea. Drink it slowly for maximum benefit." %>
+  <% end %>
+
+  <% if @beverage_entry.symptoms.any? { |s| ["Insomnia"].include?(s.name) } && @beverage_entry.beverage_subtype&.name&.include?("Black Tea") %>
+  <% recommendations << "Evening Tip: Black tea contains caffeine that may disrupt sleep. Switch to caffeine-free herbal teas in the evening." %>
+  <% end %>
+
+  <% when "juice" %>
+  <% if @beverage_entry.symptoms.any? { |s| ["Diarrhea / Loose Stools"].include?(s.name) } %>
+  <% recommendations << "Fruit Sugar Note: High fructose content in juices can sometimes cause loose stools. Try diluting with water." %>
+  <% end %>
+
+  <% if @beverage_entry.symptoms.any? { |s| ["Dry Mouth / Sticky Saliva"].include?(s.name) } %>
+  <% recommendations << "Hydration Tip: While tasty, fruit juices aren't as hydrating as water. Follow with a glass of plain water." %>
+  <% end %>
+
+  <% when "dairy", "plant_milk" %>
+  <% if @beverage_entry.symptoms.any? { |s| ["Bloating", "Diarrhea / Loose Stools"].include?(s.name) } && @beverage_entry.beverage_type.category == "dairy" %>
+  <% recommendations << "Lactose Note: You may be lactose intolerant. Try lactose-free milk or plant-based alternatives." %>
+  <% end %>
+
+  <% if @beverage_entry.symptoms.any? { |s| ["Constipation"].include?(s.name) } %>
+  <% recommendations << "Digestion Tip: Dairy can sometimes contribute to constipation. Consider adding more fiber to your diet." %>
+  <% end %>
+
+  <% when "alcoholic" %>
+  <% if @beverage_entry.symptoms.any? { |s| ["Headache", "Dry Mouth / Sticky Saliva"].include?(s.name) } %>
+  <% recommendations << "Hydration Reminder: Alcohol dehydrates the body. Drink a glass of water for each alcoholic beverage." %>
+  <% end %>
+
+  <% if @beverage_entry.symptoms.any? { |s| ["Nausea"].include?(s.name) } %>
+  <% recommendations << "Alcohol Tip: Sugary cocktails may worsen nausea. Stick to simpler drinks if experiencing discomfort." %>
+  <% end %>
+
+  <% when "fermented" %>
+  <% if @beverage_entry.symptoms.any? { |s| ["Bloating", "Burping / Excess Gas"].include?(s.name) } %>
+  <% recommendations << "Probiotic Note: Fermented drinks can initially cause gas as your gut adjusts. Start with small amounts." %>
+  <% end %>
+  <% end %>
+
+  <!-- Addition-Specific Recommendations -->
+  <% if @beverage_entry.beverage_additions.any? %>
+  <% if @beverage_entry.beverage_additions.any? { |a| ["Artificial Sweeteners"].include?(a.name) } && @beverage_entry.symptoms.any? { |s| ["Diarrhea / Loose Stools"].include?(s.name) } %>
+  <% recommendations << "Sweetener Warning: Artificial sweeteners may cause digestive issues in some people." %>
+  <% end %>
+
+  <% if @beverage_entry.beverage_additions.any? { |a| ["Sugar", "Honey"].include?(a.name) } && @beverage_entry.symptoms.any? { |s| ["Headache", "Fatigue"].include?(s.name) } %>
+  <% recommendations << "Sugar Note: The sugar spike may be causing energy fluctuations. Consider reducing sweeteners." %>
+  <% end %>
+  <% end %>
+  <% else %>
+  <!-- Positive reinforcement when no symptoms -->
+  <% if @beverage_entry.beverage_type.category == "water" %>
+  <% recommendations << "Great Choice! Water is always an excellent hydrating option." %>
+  <% elsif ["tea", "coffee"].include?(@beverage_entry.beverage_type.category) && @beverage_entry.beverage_additions.none? { |a| ["Sugar", "Artificial Sweeteners"].include?(a.name) } %>
+  <% recommendations << "Well Done! Enjoying #{@beverage_entry.beverage_type.name.downcase} without added sweeteners is a healthy choice." %>
+  <% end %>
+  <% end %>
+
+  <% if recommendations.any? %>
+  <div class="mt-6 border-t border-gray-200 pt-4">
+    <h3 class="text-lg font-medium text-gray-900">Recommendations</h3>
+    <div class="mt-3 space-y-3">
+      <% recommendations.each do |recommendation| %>
+      <div class="p-3 bg-blue-50 text-blue-800 rounded-lg">
+        <p class="text-sm"><%= recommendation %></p>
+      </div>
+      <% end %>
+    </div>
+  </div>
+  <% end %>
+
+  <div class="mt-6">
+    <%= link_to "Log Another Beverage", new_beverage_entry_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+  </div>
+
+  <div class="mt-4">
+    <%= link_to "Back", :back, class: "px-8 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all duration-200" %>
+  </div>
+</div>

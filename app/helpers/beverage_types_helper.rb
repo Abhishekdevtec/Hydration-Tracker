@@ -1,0 +1,2 @@
+module BeverageTypesHelper
+end

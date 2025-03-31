@@ -1,0 +1,209 @@
+<%= form_with(model: beverage_entry, 
+              data: { 
+                controller: "beverage-entry",
+                action: "submit->beverage-entry#submitForm",
+                beverage_entry_target: "form"
+              }) do |form| %>
+<div class="space-y-4">
+  <!-- Section: Date & Time -->
+  <h3 class="text-base font-medium text-gray-900 mb-3">When did you consume this?</h3>
+  <div class="bg-white p-3 rounded-lg shadow-sm">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <%= form.label :consumed_at_date, "Date", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.date_field :consumed_at_date, required: true, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border" %>
+      </div>
+      <div>
+        <%= form.label :consumed_at_time, "Time", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.time_field :consumed_at_time, required: true, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border" %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Photo Upload (Optional) -->
+  <div>
+    <%= form.label :photo, "Beverage Photo (Optional)", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.file_field :photo, class: "mt-1 block w-full text-sm text-gray-500 bg-white p-3 rounded-lg shadow-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" %>
+  </div>
+
+  <!-- Beverage Type Selection -->
+  <div>
+    <%= form.label :beverage_type_id, "Beverage Category", class: "block text-sm font-medium text-gray-700" %>
+    <div>
+      <%= form.collection_select :beverage_type_id, BeverageType.standard + [BeverageType.new(id: -1, name: "Other")], :id, :name, { prompt: "Select a category" }, { required: true, class: "mt-1 block w-full border p-3 bg-white rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", data: { action: "change->beverage-entry#updateSubtypes" } } %>
+    </div>
+  </div>
+
+  <!-- Subcategory Dropdown (Conditional) -->
+  <div data-beverage-entry-target="subtypeContainer" class="hidden">
+    <%= form.label :beverage_subtype_id, "Beverage Type", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.collection_select :beverage_subtype_id, [], :id, :name, { prompt: "Select a type" }, { class: "mt-1 block w-full border p-3 bg-white rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" } %>
+  </div>
+
+  <!-- Custom Type Input (Conditional) -->
+  <div data-beverage-entry-target="customTypeContainer" class="hidden">
+    <%= form.label :custom_type, "Custom Beverage Name", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.text_field :custom_type, class: "mt-1 block w-full p-3 bg-white rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+  </div>
+
+  <!-- Quantity -->
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <%= form.label :quantity, "Quantity", class: "block text-sm font-medium text-gray-700" %>
+      <%= form.number_field :quantity, step: "0.1", class: "mt-1 block w-full border p-3 bg-white rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+    </div>
+    <div>
+      <%= form.label :unit, "Unit", class: "block text-sm font-medium text-gray-700" %>
+      <%= form.select :unit, options_for_select(["oz", "cup", "ml", "liter"]), {}, { class: "mt-1 block w-full border p-3 bg-white rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" } %>
+    </div>
+  </div>
+
+  <!-- Preset Quantity Buttons -->
+  <div class="flex space-x-2">
+    <button type="button" data-action="click->beverage-entry#setQuantity" data-quantity="8" data-unit="oz" class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+      8 oz
+    </button>
+    <button type="button" data-action="click->beverage-entry#setQuantity" data-quantity="16" data-unit="oz" class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+      16 oz
+    </button>
+    <button type="button" data-action="click->beverage-entry#setQuantity" data-quantity="500" data-unit="ml" class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+      500 ml
+    </button>
+  </div>
+
+  <!-- Temperature -->
+  <div class="space-y-2">
+    <%= form.label :temperature, "Temperature", class: "block text-sm font-medium text-gray-700" %>
+    <div class="bg-white p-3 rounded-lg shadow-sm space-y-2">
+      <!-- Big live-updating numbers -->
+      <div class="text-center">
+        <span class="text-2xl font-bold text-blue-600" data-beverage-entry-target="temperatureValueC">20</span>
+        <span class="text-xl text-blue-400">°C</span>
+        <span class="mx-2 text-gray-300">|</span>
+        <span class="text-2xl font-bold text-blue-600" data-beverage-entry-target="temperatureValueF">68</span>
+        <span class="text-xl text-blue-400">°F</span>
+      </div>
+
+      <!-- Slider with instant update -->
+      <%= form.range_field :temperature, in: 0..100, step: 1, 
+            value: form.object.temperature || 20,
+            class: "w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer mt-2", 
+            data: { 
+              beverage_entry_target: "temperatureSlider",
+              action: "input->beverage-entry#updateTemperatureDisplay change->beverage-entry#updateTemperatureDisplay"
+            } %>
+
+      <!-- Descriptive label -->
+      <div class="text-center text-sm font-medium text-gray-600 pt-1" data-beverage-entry-target="temperatureLabel">
+        🌡️ Room Temperature (20°C / 68°F)
+      </div>
+
+      <!-- Scale markers -->
+      <div class="flex justify-between text-xs text-gray-400 mt-1">
+        <span>❄️ 0°C</span>
+        <span>♨️ 100°C</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Additions -->
+  <div>
+    <label class="block text-sm font-medium text-gray-700">Additions</label>
+    <div class="mt-2 grid grid-cols-2 gap-1 bg-white p-3 rounded-lg shadow-sm">
+      <% BeverageAddition.standard.each do |addition| %>
+      <div class="flex items-center">
+        <%= check_box_tag "beverage_entry[addition_ids][]", addition.id, false, id: "beverage_entry_addition_#{addition.id}", class: "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
+        <%= label_tag "beverage_entry_addition_#{addition.id}", addition.name, class: "ml-2 block text-sm text-gray-700" %>
+      </div>
+      <% end %>
+
+      <!-- "Other" Option -->
+      <div class="flex items-center">
+        <%= check_box_tag "beverage_entry[addition_ids][]", "other", false, id: "beverage_entry_addition_other", class: "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500", data: { action: "change->beverage-entry#toggleOtherAddition" } %>
+        <%= label_tag "beverage_entry_addition_other", "Other", class: "ml-2 block text-sm text-gray-700" %>
+      </div>
+    </div>
+
+    <!-- Custom Addition Text Field (Hidden Initially) -->
+    <div id="otherAdditionContainer" class="hidden mt-2">
+      <%= text_field_tag "beverage_entry[other_addition]", nil, placeholder: "Enter other additives...", class: "bg-white p-3 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div>
+    <%= form.label :notes, "Notes", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.text_area :notes, rows: 3, class: "mt-1 block w-full bg-white p-3 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "Was this drink hot or cold?\nAny digestion observations?\nDid you notice a taste or texture change?" %>
+  </div>
+
+  <!-- Symptoms -->
+  <div class="pt-2">
+    <h3 class="text-lg font-medium text-gray-900">Symptom Tracking</h3>
+  </div>
+  <div class="bg-white p-3 rounded-lg shadow-sm">
+    <label class="block text-sm font-medium text-gray-700">Did you experience any symptoms?</label>
+    <div class="mt-2 flex space-x-4">
+      <div class="flex items-center">
+        <%= radio_button_tag :has_symptoms, "yes", false, class: "h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500", data: { action: "change->beverage-entry#toggleSymptoms" } %>
+        <%= label_tag :has_symptoms_yes, "Yes", class: "ml-2 block text-sm text-gray-700" %>
+      </div>
+      <div class="flex items-center">
+        <%= radio_button_tag :has_symptoms, "no", true, class: "h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500", data: { action: "change->beverage-entry#toggleSymptoms" } %>
+        <%= label_tag :has_symptoms_no, "No", class: "ml-2 block text-sm text-gray-700" %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Symptom Details (Conditional) -->
+  <div data-beverage-entry-target="symptomsContainer" class="hidden space-y-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Select Symptoms</label>
+      <div class="bg-white p-3 rounded-lg shadow-sm mt-2 grid grid-cols-2 gap-2">
+        <% Symptom.standard.each do |symptom| %>
+        <div class="flex items-center">
+          <%= check_box_tag "beverage_entry[symptom_ids][]", symptom.id, false, id: "beverage_entry_symptom_#{symptom.id}", class: "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
+          <%= label_tag "beverage_entry_symptom_#{symptom.id}", symptom.name, class: "ml-2 block text-sm text-gray-700" %>
+        </div>
+        <% end %>
+
+        <!-- "Other" option -->
+        <div class="flex items-center">
+          <%= check_box_tag "beverage_entry[symptom_ids][]", "other", false, id: "beverage_entry_symptom_other", class: "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500", data: { action: "change->beverage-entry#toggleOtherSymptom" } %>
+          <%= label_tag "beverage_entry_symptom_other", "Other", class: "ml-2 block text-sm text-gray-700" %>
+        </div>
+      </div>
+
+      <!-- Custom "Other" Symptom Input -->
+      <div id="otherSymptomContainer" class="hidden mt-2">
+        <%= label_tag "beverage_entry[custom_symptom]", "Specify Other Symptom", class: "block text-sm font-medium text-gray-700" %>
+        <%= text_field_tag "beverage_entry[custom_symptom]", nil, class: "bg-white p-3 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+      </div>
+    </div>
+
+    <div>
+      <%= label_tag :symptom_severity, "Severity", class: "block text-sm font-medium text-gray-700" %>
+      <%= select_tag :symptom_severity, options_for_select(["Mild", "Moderate", "Severe"]), { prompt: "Select severity", class: "mt-1 block w-full rounded-md border-gray-300 bg-white p-3 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" } %>
+    </div>
+
+    <div>
+      <%= label_tag :symptom_timing, "When did symptoms appear?", class: "block text-sm font-medium text-gray-700" %>
+      <%= select_tag :symptom_timing, options_for_select(["Immediately", "Within 20-30 minutes", "2-5 hours", "5+ hours later"]), { prompt: "Select timing", class: "mt-1 block w-full bg-white rounded-md border-gray-300  p-3 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" } %>
+    </div>
+
+    <div>
+      <%= label_tag :symptom_notes, "Symptom Notes", class: "block text-sm font-medium text-gray-700" %>
+      <%= text_area_tag :symptom_notes, nil, rows: 2, class: "mt-1 block w-full rounded-md border-gray-300  p-3 bg-white rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+    </div>
+  </div>
+
+  <!-- Submit Button -->
+  <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+    Log Beverage
+  </button>
+
+  <div class="mt-4 flex justify-center">
+    <%= link_to "Back", beverage_entries_path, class: "w-full text-center py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all duration-200" %>
+  </div>
+</div>
+<% end %>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html class="h-full bg-gray-50">
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= content_for?(:title) ? yield(:title) : "BeverageTracker" %></title>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= javascript_importmap_tags %>
+  <style>
+    @media (max-height: 600px) {
+      .auth-container {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body class="h-full">
+  <div class="auth-container min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+      <h1 class="text-center text-3xl font-extrabold text-primary-600">BeverageTracker</h1>
+      <%= content_for?(:auth_header) ? yield(:auth_header) : yield %>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <div class="bg-white py-8 px-4 shadow-lg rounded-lg sm:px-10">
+        <%= yield %>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

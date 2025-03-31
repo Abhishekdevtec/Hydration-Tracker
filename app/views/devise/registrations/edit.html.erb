@@ -1,0 +1,77 @@
+<% content_for :title, "Edit your account" %>
+<% content_for :auth_header do %>
+<h2 class="mt-6 text-center text-2xl font-bold text-gray-900">
+  Update your account
+</h2>
+<p class="mt-2 text-center text-sm text-gray-600">
+  Manage your profile and security
+</p>
+<% end %>
+
+<div class="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden">
+    <div class="bg-primary-600 py-6 px-8">
+      <h2 class="text-2xl font-bold text-grey text-center">Account Settings</h2>
+    </div>
+
+    <div class="p-8">
+      <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, class: "space-y-6" }) do |f| %>
+      <%= render "devise/shared/error_messages", resource: resource %>
+
+      <div>
+        <%= f.label :email, class: "block text-sm font-medium text-gray-700" %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email",
+              class: "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" %>
+      </div>
+
+      <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+      <div class="text-sm text-blue-600">
+        Currently waiting confirmation for: <%= resource.unconfirmed_email %>
+      </div>
+      <% end %>
+
+      <div>
+        <%= f.label :password, class: "block text-sm font-medium text-gray-700" %>
+        <%= f.password_field :password, autocomplete: "new-password",
+              class: "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" %>
+        <p class="mt-1 text-xs text-gray-500">Leave blank if you don't want to change it</p>
+        <% if @minimum_password_length %>
+        <p class="mt-1 text-xs text-gray-500"><%= @minimum_password_length %> characters minimum</p>
+        <% end %>
+      </div>
+
+      <div>
+        <%= f.label :password_confirmation, class: "block text-sm font-medium text-gray-700" %>
+        <%= f.password_field :password_confirmation, autocomplete: "new-password",
+              class: "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" %>
+      </div>
+
+      <div>
+        <%= f.label :current_password, class: "block text-sm font-medium text-gray-700" %>
+        <%= f.password_field :current_password, autocomplete: "current-password",
+              class: "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" %>
+        <p class="mt-1 text-xs text-gray-500">We need your current password to confirm your changes</p>
+      </div>
+
+      <div>
+        <%= f.submit "Update", 
+              class: "w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" %>
+      </div>
+      <% end %>
+
+      <div class="mt-8 border-t border-gray-200 pt-6">
+        <h3 class="text-lg font-medium text-gray-900 pt-2">Cancel account</h3>
+        <p class="mt-1 text-sm text-gray-600">Unhappy with the service?</p>
+
+        <%= button_to "Cancel my account", registration_path(resource_name), 
+            method: :delete,
+            data: { confirm: "Are you sure? This cannot be undone.", turbo_confirm: "Are you sure? This cannot be undone." },
+            class: "mt-2 w-full flex justify-center py-2 px-4 border border-red-600 rounded-md shadow-sm text-sm font-medium text-red-600 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
+
+        <div class="flex justify-center mt-4">
+          <%= link_to "Back", :back, class: "inline-block text-sm font-medium text-primary-600 hover:text-primary-500" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

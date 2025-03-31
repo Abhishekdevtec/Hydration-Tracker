@@ -1,0 +1,17 @@
+/* Custom Devise flash messages */
+.alert {
+    @apply p-4 mb-4 rounded-lg bg-red-50 text-red-800;
+  }
+  
+  .notice {
+    @apply p-4 mb-4 rounded-lg bg-green-50 text-green-800;
+  }
+  
+  /* Form error highlighting */
+  .field_with_errors input {
+    @apply border-red-500 focus:border-red-500 focus:ring-red-500;
+  }
+  
+  .field_with_errors label {
+    @apply text-red-600;
+  }

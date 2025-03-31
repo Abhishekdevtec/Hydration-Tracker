@@ -1,0 +1,9 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  beverage_entry: one
+  beverage_addition: one
+
+two:
+  beverage_entry: two
+  beverage_addition: two

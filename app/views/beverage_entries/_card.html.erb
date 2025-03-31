@@ -1,0 +1,58 @@
+<div class="bg-white rounded-xl shadow overflow-hidden hover:shadow-lg transition-shadow duration-300 group p-2">
+  <!-- Card Header with Beverage Type -->
+  <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 flex justify-between items-center">
+    <h3 class="text-lg font-semibold text-gray-800 truncate">
+      <%= truncate((entry.custom_type.presence || entry.beverage_subtype&.name || entry.beverage_type&.name), length: 20) %>
+    </h3>
+
+    <div class="flex items-center space-x-2">
+      <span class="text-xs font-medium px-2 py-1 rounded-full bg-white shadow-sm text-gray-700">
+        <%= entry.consumed_at.strftime("%b %d") %>
+      </span>
+      <span class="text-xs font-medium px-2 py-1 rounded-full bg-white shadow-sm text-gray-500">
+        <%= entry.consumed_at.strftime("%H:%M") %>
+      </span>
+    </div>
+  </div>
+
+  <!-- Card Body -->
+  <div class="pt-2 p-4">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center space-x-2">
+        <span class="text-xl font-bold text-grey-800">
+          <%= entry.quantity %>
+        </span>
+        <span class="text-gray-500">
+          <%= entry.unit %>
+        </span>
+      </div>
+
+      <% if entry.temperature.present? %>
+      <div class="flex items-center space-x-1 bg-blue-50 rounded-full px-3 py-1 space-x-2">
+        <span class="text-blue-500"><%= temperature_emoji(entry.temperature) %></span>
+        <span class="text-sm text-blue-800">
+          <%= temperature_label(entry.temperature) %>
+          <span class="text-xs opacity-70">(<%= entry.temperature %>°C)</span>
+        </span>
+      </div>
+      <% end %>
+    </div>
+
+    <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center min-h-[40px]">
+      <% if entry.notes.present? %>
+      <p class="text-sm text-gray-600 line-clamp-2">
+        <%= truncate(entry.notes, length: 20) %>
+      </p>
+      <% else %>
+      <span class="text-sm text-gray-400"></span>
+      <% end %>
+
+      <%= link_to beverage_entry_path(entry), class: "text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center group ml-4" do %>
+      Details
+      <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+      <% end %>
+    </div>
+  </div>
+</div>

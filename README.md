@@ -29,7 +29,7 @@ A Ruby on Rails application to track daily beverage consumption and hydration ha
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/hydration_tracker.git
+   git clone https://github.com/Abhishekdevtec/Hydration-Tracker
    cd hydration_tracker
 
 2. Install dependencies:

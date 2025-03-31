@@ -44,7 +44,7 @@ A Ruby on Rails application to track daily beverage consumption and hydration ha
     rails db:create
     rails db:migrate
 
-4. (Optional) Seed with sample data:
+4. Seed with sample data:
 
     ```bash
     rails db:seed
